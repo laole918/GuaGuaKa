@@ -3,17 +3,34 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.laole918.guaguaka.widget.GuaGuaKaFrameLayout
-        xmlns:ggk="http://schemas.android.com/apk/res-auto"
+    <com.laole918.guaguaka.widget.GuaGuaKaFrameLayout xmlns:ggk="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/ggk_frameLayout"
         android:layout_width="match_parent"
-        android:layout_height="100dp"
+        android:layout_height="wrap_content"
+        android:background="#3ff3ff"
         ggk:ggk_foreground="#dddddd"
         ggk:ggk_strokeWidth="20dp">
 
-        <TextView
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="恭喜你中了100000000万，快去领奖吧" />
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:layout_marginBottom="15dp"
+            android:layout_marginTop="15dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="恭喜你中了100000000万，快去领奖吧" />
+
+            <Button
+                android:id="@+id/btn_view_desc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="查看详情" />
+        </LinearLayout>
     </com.laole918.guaguaka.widget.GuaGuaKaFrameLayout>
 </FrameLayout>

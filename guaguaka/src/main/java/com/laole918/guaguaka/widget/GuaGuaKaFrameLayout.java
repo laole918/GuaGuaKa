@@ -8,6 +8,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
+import android.graphics.Xfermode;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -21,7 +22,10 @@ import com.laole918.guaguaka.R;
  */
 public class GuaGuaKaFrameLayout extends FrameLayout {
 
-    private Paint mOutterPaint;
+    private final static String TAG = GuaGuaKaFrameLayout.class.getSimpleName();
+    private final static Xfermode dst_out = new PorterDuffXfermode(PorterDuff.Mode.DST_OUT);
+
+    private Paint mPaint;
     private Path mPath;
     private Canvas mCanvas;
     private Bitmap mBitmap;
@@ -29,12 +33,22 @@ public class GuaGuaKaFrameLayout extends FrameLayout {
     private int mLastX;
     private int mLastY;
 
-    private boolean mGgkForegroundSizeChanged;
     private Drawable mGgkForeground;
     private float mStrokeWidth;
 
+    private boolean mHasMoved = false;
     // 判断遮盖层区域是否消除达到阈值
-    private volatile boolean mComplete = false;
+    private boolean mComplete = false;
+
+    private OnWipeListener mOnWipeListener;
+
+    public interface OnWipeListener {
+        void onWipeClean();
+    }
+
+    public void setOnWipeListener(OnWipeListener listener) {
+        this.mOnWipeListener = listener;
+    }
 
     public GuaGuaKaFrameLayout(Context context) {
         this(context, null);
@@ -46,10 +60,10 @@ public class GuaGuaKaFrameLayout extends FrameLayout {
 
     public GuaGuaKaFrameLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.GuaGuaKaView, defStyleAttr, 0);
-        Drawable foreground = a.getDrawable(R.styleable.GuaGuaKaView_ggk_foreground);
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.GuaGuaKaFrameLayout, defStyleAttr, 0);
+        Drawable foreground = a.getDrawable(R.styleable.GuaGuaKaFrameLayout_ggk_foreground);
         setGgkForeground(foreground);
-        mStrokeWidth = a.getDimensionPixelSize(R.styleable.GuaGuaKaView_ggk_strokeWidth, 20);
+        mStrokeWidth = a.getDimensionPixelSize(R.styleable.GuaGuaKaFrameLayout_ggk_strokeWidth, 20);
         a.recycle();
         init();
     }
@@ -62,7 +76,6 @@ public class GuaGuaKaFrameLayout extends FrameLayout {
         int height = getMeasuredHeight();
         // 初始化我们的bitmap
         if(mBitmap != null) {
-            mGgkForegroundSizeChanged = true;
             if(mBitmap.getWidth() == width && mBitmap.getHeight() == height) {
                 onDrawGgkForeground(mCanvas);
                 return;
@@ -71,56 +84,67 @@ public class GuaGuaKaFrameLayout extends FrameLayout {
             mBitmap = null;
         }
         mBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        mCanvas = new Canvas(mBitmap);
+        if(mCanvas == null) {
+            mCanvas = new Canvas(mBitmap);
+        } else {
+            mCanvas.setBitmap(mBitmap);
+        }
         onDrawGgkForeground(mCanvas);
     }
 
     private void init() {
         mPath = new Path();
-        mOutterPaint = new Paint();
+        mPaint = new Paint();
         // 设置绘制path画笔的一些属性
-//        mOutterPaint.setColor(Color.parseColor("#c0c0c0"));
-        mOutterPaint.setAntiAlias(true);
-        mOutterPaint.setDither(true);
-        mOutterPaint.setStrokeJoin(Paint.Join.ROUND);
-        mOutterPaint.setStrokeCap(Paint.Cap.ROUND);
-        mOutterPaint.setStyle(Paint.Style.FILL);
-        mOutterPaint.setStrokeWidth(mStrokeWidth);
+//        mPaint.setColor(Color.parseColor("#c0c0c0"));
+        mPaint.setAntiAlias(true);
+        mPaint.setDither(true);
+        mPaint.setStrokeJoin(Paint.Join.ROUND);
+        mPaint.setStrokeCap(Paint.Cap.ROUND);
+        mPaint.setStyle(Paint.Style.FILL);
+        mPaint.setStrokeWidth(mStrokeWidth);
+    }
+
+    public boolean onInterceptTouchEvent(MotionEvent event) {
+        if(mComplete) {
+            return false;
+        }
+        return true;
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         int action = event.getAction();
-
         int x = (int) event.getX();
         int y = (int) event.getY();
-
         switch (action) {
             case MotionEvent.ACTION_DOWN:
                 mLastX = x;
                 mLastY = y;
-                mPath.moveTo(mLastX, mLastY);
+                if (!mComplete) {
+                    mPath.moveTo(mLastX, mLastY);
+                }
                 break;
             case MotionEvent.ACTION_MOVE:
-
                 int dx = Math.abs(x - mLastX);
                 int dy = Math.abs(y - mLastY);
-
-                if (dx > 3 || dy > 3) {
+                if ((dx > 3 || dy > 3) && !mComplete) {
                     mPath.lineTo(x, y);
+                    mHasMoved = true;
                 }
-
                 mLastX = x;
                 mLastY = y;
-
                 break;
             case MotionEvent.ACTION_UP:
-                if (!mComplete)
+                if (!mComplete && mHasMoved) {
+                    mHasMoved = false;
                     new Thread(mRunnable).start();
+                }
                 break;
         }
-        if (!mComplete)
+        if (!mComplete) {
             invalidate();
+        }
         return true;
 
     }
@@ -130,15 +154,12 @@ public class GuaGuaKaFrameLayout extends FrameLayout {
         public void run() {
             int w = getWidth();
             int h = getHeight();
-
             float wipeArea = 0;
             float totalArea = w * h;
             Bitmap bitmap = mBitmap;
-            int[] mPixels = new int[w * h];
-
+            int [] mPixels = new int[w * h];
             // 获得Bitmap上所有的像素信息
             bitmap.getPixels(mPixels, 0, w, 0, 0, w, h);
-
             for (int i = 0; i < w; i++) {
                 for (int j = 0; j < h; j++) {
                     int index = i + j * w;
@@ -150,13 +171,19 @@ public class GuaGuaKaFrameLayout extends FrameLayout {
 
             if (wipeArea > 0 && totalArea > 0) {
                 int percent = (int) (wipeArea * 100 / totalArea);
-
-                Log.e("TAG", percent + "");
-
+                Log.e(TAG, "wipeArea:" + percent);
                 if (percent > 60) {
                     // 清除掉图层区域
-                    mComplete = true;
-                    postInvalidate();
+                    post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mComplete = true;
+                            if(mOnWipeListener != null) {
+                                mOnWipeListener.onWipeClean();
+                            }
+                            invalidate();
+                        }
+                    });
                 }
             }
 
@@ -177,9 +204,9 @@ public class GuaGuaKaFrameLayout extends FrameLayout {
     }
 
     private void drawPath() {
-        mOutterPaint.setStyle(Paint.Style.STROKE);
-        mOutterPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_OUT));
-        mCanvas.drawPath(mPath, mOutterPaint);
+        mPaint.setStyle(Paint.Style.STROKE);
+        mPaint.setXfermode(dst_out);
+        mCanvas.drawPath(mPath, mPaint);
     }
 
     public void setGgkForeground(Drawable foreground) {
@@ -195,7 +222,6 @@ public class GuaGuaKaFrameLayout extends FrameLayout {
         }
         setWillNotDraw(false);
         mGgkForeground = foreground;
-        mGgkForegroundSizeChanged = true;
         invalidate();
     }
 
@@ -207,9 +233,8 @@ public class GuaGuaKaFrameLayout extends FrameLayout {
     }
 
     private void setGgkForegroundBounds() {
-//        if (mGgkForegroundSizeChanged && mGgkForeground != null) {
+        if (mGgkForeground != null) {
             mGgkForeground.setBounds(0, 0,  getRight() - getLeft(), getBottom() - getTop());
-            mGgkForegroundSizeChanged = false;
-//        }
+        }
     }
 }

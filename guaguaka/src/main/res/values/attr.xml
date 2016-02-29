@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="GuaGuaKaView">
+    <declare-styleable name="GuaGuaKaFrameLayout">
         <attr name="ggk_strokeWidth" format="dimension" />
         <attr name="ggk_foreground" format="reference|color" />
     </declare-styleable>
