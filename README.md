@@ -3,13 +3,13 @@ Android 自定义控件实现刮刮卡效果
 
 ****
 
-### 使用Gradle构建时添加一下依赖即可:
-```Java
+### 使用Gradle构建时添加一下依赖即可
+```groovy
     maven {
         url 'https://dl.bintray.com/laole918/maven/'
     }
 ```
-```Java
+```groovy
     compile 'com.laole918:guaguaka:1.0.0'
 ```
 ### 示例
@@ -49,5 +49,5 @@ Android 自定义控件实现刮刮卡效果
 ### 效果
 ![](https://github.com/laole918/GuaGuaKa/raw/master/preview/device-2016-02-29-170906.gif)
 ### 感谢
-此库是在看过[张鸿洋的博客](http://blog.csdn.net/lmj623565791/article/details/40162163 "张鸿洋的博客")以及[张大神的视频](http://www.imooc.com/learn/225 "慕客网")之后稍作修改而成。
+此库是在看过[张鸿洋的博客](http://blog.csdn.net/lmj623565791/article/details/40162163 "张鸿洋的博客")以及[张大神的视频](http://www.imooc.com/learn/225 "慕客网")之后稍作修改而成。<br>
 自己的原创的东西很少。
