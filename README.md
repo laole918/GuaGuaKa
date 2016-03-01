@@ -1,8 +1,7 @@
-### 刮刮卡简介
+### GuaGuaKa刮刮卡简介
 Android 自定义控件实现刮刮卡效果
 
 ****
-
 ### 使用Gradle构建时添加一下依赖即可
 ```groovy
     maven {
