@@ -25,6 +25,9 @@ public class GuaGuaKaFrameLayout extends FrameLayout {
     private final static String TAG = GuaGuaKaFrameLayout.class.getSimpleName();
     private final static Xfermode dst_out = new PorterDuffXfermode(PorterDuff.Mode.DST_OUT);
 
+    private final int DEFAULT_STROKEWIDTH = 20;
+    private final float DEFAULT_PERCENTAGE = 0.6f;
+
     private Paint mPaint;
     private Path mPath;
     private Canvas mCanvas;
@@ -34,7 +37,8 @@ public class GuaGuaKaFrameLayout extends FrameLayout {
     private int mLastY;
 
     private Drawable mGgkForeground;
-    private float mStrokeWidth;
+    private int mStrokeWidth;
+    private float mPercentage;
 
     private boolean mHasMoved = false;
     // 判断遮盖层区域是否消除达到阈值
@@ -63,7 +67,8 @@ public class GuaGuaKaFrameLayout extends FrameLayout {
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.GuaGuaKaFrameLayout, defStyleAttr, 0);
         Drawable foreground = a.getDrawable(R.styleable.GuaGuaKaFrameLayout_ggk_foreground);
         setGgkForeground(foreground);
-        mStrokeWidth = a.getDimensionPixelSize(R.styleable.GuaGuaKaFrameLayout_ggk_strokeWidth, 20);
+        mStrokeWidth = a.getDimensionPixelSize(R.styleable.GuaGuaKaFrameLayout_ggk_strokeWidth, DEFAULT_STROKEWIDTH);
+        mPercentage = a.getFloat(R.styleable.GuaGuaKaFrameLayout_ggk_percentage, DEFAULT_PERCENTAGE);
         a.recycle();
         init();
     }
@@ -172,7 +177,7 @@ public class GuaGuaKaFrameLayout extends FrameLayout {
             if (wipeArea > 0 && totalArea > 0) {
                 int percent = (int) (wipeArea * 100 / totalArea);
                 Log.e(TAG, "wipeArea:" + percent);
-                if (percent > 60) {
+                if (percent > mPercentage * 100 || percent == 100) {
                     // 清除掉图层区域
                     post(new Runnable() {
                         @Override
