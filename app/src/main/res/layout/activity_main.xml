@@ -9,16 +9,16 @@
         android:layout_height="wrap_content"
         android:background="#3ff3ff"
         ggk:ggk_foreground="#dddddd"
-        ggk:ggk_strokeWidth="20dp"
-        ggk:ggk_percentage="0.4">
+        ggk:ggk_percentage="0.4"
+        ggk:ggk_strokeWidth="20dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:layout_marginBottom="15dp"
             android:layout_marginLeft="15dp"
             android:layout_marginRight="15dp"
-            android:layout_marginBottom="15dp"
             android:layout_marginTop="15dp"
             android:orientation="vertical">
 
@@ -34,4 +34,11 @@
                 android:text="查看详情" />
         </LinearLayout>
     </com.laole918.guaguaka.widget.GuaGuaKaFrameLayout>
+
+    <Button
+        android:id="@+id/btn_wipe"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:text="直接擦除" />
 </FrameLayout>

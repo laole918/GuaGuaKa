@@ -182,11 +182,7 @@ public class GuaGuaKaFrameLayout extends FrameLayout {
                     post(new Runnable() {
                         @Override
                         public void run() {
-                            mComplete = true;
-                            if(mOnWipeListener != null) {
-                                mOnWipeListener.onWipeClean();
-                            }
-                            invalidate();
+                            wipeGgkForeground();
                         }
                     });
                 }
@@ -230,7 +226,7 @@ public class GuaGuaKaFrameLayout extends FrameLayout {
         invalidate();
     }
 
-    public void onDrawGgkForeground(Canvas canvas) {
+    private void onDrawGgkForeground(Canvas canvas) {
         if (mGgkForeground != null) {
             setGgkForegroundBounds();
             mGgkForeground.draw(canvas);
@@ -241,5 +237,13 @@ public class GuaGuaKaFrameLayout extends FrameLayout {
         if (mGgkForeground != null) {
             mGgkForeground.setBounds(0, 0,  getRight() - getLeft(), getBottom() - getTop());
         }
+    }
+
+    public void wipeGgkForeground() {
+        mComplete = true;
+        if(mOnWipeListener != null) {
+            mOnWipeListener.onWipeClean();
+        }
+        invalidate();
     }
 }

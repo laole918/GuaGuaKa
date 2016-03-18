@@ -14,6 +14,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private GuaGuaKaFrameLayout ggkFrameLayout;
     private Button btnViewDesc;
+    private Button btnWipe;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,12 +24,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         ggkFrameLayout.setOnWipeListener(this);
         btnViewDesc = (Button) findViewById(R.id.btn_view_desc);
         btnViewDesc.setOnClickListener(this);
+        btnWipe = (Button) findViewById(R.id.btn_wipe);
+        btnWipe.setOnClickListener(this);
     }
 
     @Override
     public void onClick(View v) {
         if(v.equals(btnViewDesc)) {
             Log.e(TAG, "你点击了查看详情按钮");
+        } else if(v.equals(btnWipe)) {
+            ggkFrameLayout.wipeGgkForeground();
         }
     }
 
