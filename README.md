@@ -9,7 +9,7 @@ Android 自定义控件实现刮刮卡效果
     }
 ```
 ```groovy
-    compile 'com.laole918:guaguaka:1.0.1'
+    compile 'com.laole918:guaguaka:1.0.2'
 ```
 ### 示例
 ```xml
@@ -52,4 +52,5 @@ Android 自定义控件实现刮刮卡效果
 此库是在看过[张鸿洋的博客](http://blog.csdn.net/lmj623565791/article/details/40162163 "张鸿洋的博客")以及[张大神的视频](http://www.imooc.com/learn/225 "慕客网")之后稍作修改而成。<br>
 自己的原创的东西很少。
 ### 更新
+1.0.2增加wipeGgkForeground方法，直接清除前景
 1.0.1增加刮除完成的百分比，配置参数
